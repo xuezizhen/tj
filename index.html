@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <title>Title</title>
+    <script src="angular.js"></script>
+    <style>
+        *{ padding:0;margin:0 }
+
+        /*底部*/
+        .footer { position: fixed;bottom: 0;left:0;height:64px;text-align: center;width:100%;border-top: 1px solid #eee;background: #ccc ;color:#999;}
+        .con { width:25%;float:left }
+        .footer img {width:35px;margin-top: 5px;}
+        .green { color:green }
+        /*首页*/
+        .goods { width:50%;float:left; }
+        .good { border:1px solid #ccc;padding:10px 15px;}
+        .good img { width:100% }
+        .goods .des { padding:5px 15px; border:1px solid #ccc}
+        .goods .des span { color:red }
+        .addBtn { float:right; width:20px;height:20px;border-radius: 50%;background: red;color:#fff;border:none}
+        .add_des { float:right; }
+        .add_des button { width:15px;border-radius: 5px;background: red;color:#fff;border:none;outline: none;padding:3px;margin-right:3px; }
+        /*购物车*/
+        .goodsTop { padding:0 20px;height:30px;line-height: 30px;border-bottom: 2px solid #ccc; }
+        .goodsAll { padding:20px; border-bottom: 1px solid #ccc; }
+        .goodsAll img {  width:50px;float:left;margin-right:10px; }
+        .goodsAll span { color:red }
+        .goodsAll p { font-size: 14px;color:#ccc }
+        .buy {  float:right;border:1px solid #ccc;border-bottom: none; padding:0 3%;background: red;}
+
+        /*地址栏*/
+        .body {  position: relative; }
+        .box {width:100%;background: #ccc;list-style: none;border:1px solid gray;}
+         li { height:100px;width:95%;background: #fff;margin-bottom: 10px;padding:0 10px;}
+        .top {height:40px;line-height: 40px;border-bottom: 1px solid #ccc;}
+        .ac { color:red }
+        .moren {float:left}
+        .bianji {float:right;margin-right:20px;color:red}
+        .del { float:right;color:red  }
+        .b_t { height:30px;line-height:30px;}
+        .b_t span {float:left;margin-right: 10px;text-overflow: ellipsis;overflow: hidden;white-space: nowrap}
+        .name { width:65px; }
+        .tel { width:100px; }
+        .address { width:90%;}
+        .show { position: absolute;top:0;left:0;right:0;bottom:0;margin:auto;width:200px;height:100px;padding:20px;border: 1px solid #ccc;background: #eee }
+        .show input { width:190px;height:20px;line-height: 20px;margin-bottom: 5px; }
+        .show button { margin-right: 15px;width:50px; }
+
+        .sign { width:100%;height:100%;background-color: #fff;position: absolute;z-index: 2; }
+        .signbox { border: 1px solid  #000;position: absolute;width:70%;height:15%;left:15%;right:15%;top:5% }
+        .signbox input {  width:73%;height:25%;margin-top: 5%; margin-left: 12%;padding-left: 2%;border: 1px solid  #000}
+        .signbox button { margin:5% 2% 0 12%;width:30%;height:20% ;border:none;}
+
+    </style>
+</head>
+<body>
+<div ng-app="myApp" ng-controller="myCtrl" class="body">
+
+    <!--登录-->
+    <div class="sign" ng-hide="signOk==1">
+        <div class="signbox">
+            <input type="text" placeholder="账号" ng-model="text1">
+            <input type="text" placeholder="密码" ng-model="text2">
+            <button type="submit" ng-click="signIn()">确定</button>
+            <button type="reset" ng-click="signOut()">取消</button>
+        </div>
+    </div>
+
+    <!--首页-->
+    <div class="page" ng-show="selected==0">
+
+        <div class="goods" ng-repeat="item in arr">
+            <div class="good">
+                <img ng-src="{{item.gImg}}" alt="">
+            </div>
+            <div class="des">
+                <p>{{ item.des }}</p>
+                <span>{{ item.price|currency:'¥' }}</span>
+                <button class="addBtn" ng-show="item.num==0" ng-click="addFn($index)">+</button>
+                <p class='add_des' ng-show="item.num!=0"><button ng-click="desFn($index)">-</button>{{item.num}} <button ng-click="addFn($index)">+</button></p>
+            </div>
+        </div>
+
+        <div style="height:64px;clear: both"></div>  <!--  防止底部重叠 -->
+
+    </div>
+
+    <!--订单详情-->
+    <div class="page" ng-show="selected==1">
+        <p class="goodsTop">
+            订单详情
+        </p>
+
+
+        <div class="" ng-repeat="item in goodsLi">
+            <p>{{ item.des }}</p><span>{{item.num}}</span>
+
+        </div>
+
+
+
+    </div>
+    
+    <!--购物车-->
+    <div class="page" ng-show="selected==2">
+        <p class="goodsTop">
+            商品种类: {{ goodsLi.length }} 种,
+            商品总价: {{ totle()|currency:'¥' }}
+            <span ng-click="buy()" class="buy">购买</span>
+        </p>
+
+        <div class="goodsAll" ng-repeat="item in goodsLi">
+            <img src="{{ item.gImg }}">
+            <p>{{ item.des }}</p>
+            <span>{{ item.price|currency:'¥' }}</span>
+            <p class='add_des' ng-show="item.num!=0"><button ng-click="desFn($index)">-</button>{{item.num}} <button ng-click="addFn($index)">+</button></p>
+        </div>
+
+        <div style="height:64px;clear: both"></div>  <!--  防止底部重叠 -->
+    </div>
+
+    <!--地址栏-->
+    <div class="page" ng-show="selected==3">
+
+        <ul class="box">
+            <li ng-repeat="item in arr1">
+                <div class="top" ng-class='{"ac":item.check}'>
+                    <span class="moren" ng-click="mr($index)">{{ item.mr }}</span>
+                    <span class="del" ng-click="del($index)">删除</span>
+                    <span class="bianji" ng-click="showHid($index)">编辑</span>
+                </div>
+                <div class="bot">
+                    <div class="b_t">
+                        <span class="name">{{ item.name }}</span>
+                        <span class="tel">{{ item.tel }}</span>
+                    </div>
+                    <span class="address">{{ item.address }}</span>
+                </div>
+            </li>
+        </ul>
+        <div class="show" ng-show="appeard">
+            <input  type="text"  ng-model="name" ><br>
+            <input  type="number" ng-model="tel"><br>
+            <input  type="text"  ng-model="address" >
+            <button ng-click="yes()">确定</button><button ng-click="no()">取消</button>
+        </div>
+        <div style="height:64px;clear: both"></div>  <!--  防止底部重叠 -->
+
+    </div>
+
+    <!--导航栏-->
+    <div class="footer">
+        <div class="con" ng-click="choose(0)">
+            <img src="images/1.png" ng-show="selected!=0">
+            <img src="images/11.png" ng-show="selected==0">
+            <p ng-class="{green:selected==0}">首页</p>
+        </div>
+        <div class="con" ng-click="choose(1)">
+            <img src="images/1.png" ng-show="selected!=1">
+            <img src="images/11.png" ng-show="selected==1">
+            <p ng-class="{green:selected==1}">我的订单</p>
+        </div>
+        <div class="con" ng-click="choose(2)">
+            <img src="images/1.png" ng-show="selected!=2">
+            <img src="images/11.png" ng-show="selected==2">
+            <p ng-class="{green:selected==2}">购物车</p>
+        </div>
+        <div class="con" ng-click="choose(3)">
+            <img src="images/1.png" ng-show="selected!=3">
+            <img src="images/11.png" ng-show="selected==3">
+            <p ng-class="{green:selected==3}">地址</p>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
+
+<script>
+    var app=angular.module("myApp",[]);
+    app.controller("myCtrl",function($scope){
+
+        $scope.selected=0;
+        $scope.goodsLi = [];   //购物车数组
+
+        /*底部切换*/
+        $scope.choose=function (i) {
+            $scope.selected=i;   // i= 0 1 2 3  底部导航栏切换
+
+
+            //  切到购物车
+            if( i == 2 ) {
+                $scope.arr.forEach(function (item) {
+                    if ( item.num ){
+                        $scope.goodsLi.push(item)            //添加商品到购物车数组
+                    }
+                })
+            };
+            if( i == 0 ) $scope.goodsLi = []     //切到首页  清空购物车数组
+        };
+
+        //首页商品数组
+        $scope.arr = [
+            { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物',num:0 },
+            { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物',num:0  },
+            { gImg:'images/3.jpg',price:108,des:'智趣屋diy小屋西雅图手工制作房子拼装模型屋别墅玩具屋',num:0  },
+            { gImg:'images/4.jpg',price:48,des:'美国进口拼图表白爱意爱情神器礼物给女生心意礼品' ,num:0 },
+            { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物' ,num:0 },
+            { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物',num:0  },
+            { gImg:'images/3.jpg',price:108,des:'智趣屋diy小屋西雅图手工制作房子拼装模型屋别墅玩具屋',num:0  },
+            { gImg:'images/4.jpg',price:48,des:'美国进口拼图表白爱意爱情神器礼物给女生心意礼品',num:0  },
+            { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物',num:0  },
+            { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物' ,num:0 }
+        ];
+
+        /*首页商品数量++*/
+        $scope.addFn=function (index) {
+            $scope.arr[index].num++;
+        };
+        /*首页商品数量--*/
+        $scope.desFn=function (index) {
+            $scope.arr[index].num--;
+            if ( $scope.arr[index].num<1 ){
+                $scope.goodsLi.splice(index,1)
+            }
+
+
+        };
+        /*计算总价*/
+        $scope.totle = function () {
+            $scope.totlePrise =0;   //设总价=0
+            $scope.goodsLi.forEach(function (item) {    //循环商品
+                $scope.totlePrise+= item.num *item.price
+            });
+            return $scope.totlePrise  //返回总价
+        };
+
+        $scope.buy=function () {
+            $scope.goodsLi = []
+        };
+
+        //地址
+        $scope.arr1 = [
+            {name:'薛少爷',tel:13019790312,address:'上海市闵行区',mr:'默认地址',check:true},
+            {name:'同济大学',tel:13019790312,address:'上海市中山北路',mr:'设为默认',check:false},
+            {name:'公司',tel:13019790312,address:'上海市闵行区',mr:'设为默认',check:false}
+        ];
+
+        $scope.appeard = false;
+
+        //编辑地址
+        $scope.showHid=function (index) {
+
+            $scope.appeard = true;
+
+            $scope.name = $scope.arr1[index].name;
+            $scope.tel = $scope.arr1[index].tel;
+            $scope.address = $scope.arr1[index].address;
+            $scope.newIndex = index
+
+        };
+        //设置删除
+        $scope.del=function (index) {
+            $scope.arr1.splice(index,1);
+            if ( index==0 ) $scope.arr1[0].check = true;
+        };
+        //设置默认地址
+        $scope.mr=function (index) {
+            for (var i=0;i<$scope.arr1.length;i++){
+                $scope.arr1[i].check = false;
+                $scope.arr1[i].mr = '设为默认'
+            }
+            $scope.arr1[index].check = true;
+            $scope.arr1[index].mr = '默认地址';
+
+            var arr2= $scope.arr1[index];
+            $scope.arr1.splice(index,1);
+            $scope.arr1.unshift(arr2)
+        };
+        //编辑地址  取消
+        $scope.no=function () {
+            $scope.appeard = false
+        };
+        //编辑地址  确定
+        $scope.yes=function () {
+
+            $scope.arr1[$scope.newIndex].name = $scope.name;
+            $scope.arr1[$scope.newIndex].tel = $scope.tel;
+            $scope.arr1[$scope.newIndex].address = $scope.address;
+
+            $scope.appeard = false
+
+        };
+
+        //登录账号
+        //确定
+        $scope.signOk=0;
+        $scope.signIn=function () {
+
+            if ( $scope.text1 == '123' && $scope.text2 == '123') {
+                console.log(1);
+                $scope.signOk=1;
+            }
+            else {
+                alert('账号或密码错误');
+                $scope.text1='';
+                $scope.text2='';
+            }
+
+        };
+        //取消
+        $scope.signOut=function () {
+            $scope.text1='';
+            $scope.text2='';
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+    var a=1;
+    var b=2;
+    var c=3;
+    var arr=[];
+
+    //??
+
+    var arr=[
+        {a:1,b:2,c:3},
+        {a:1,b:2,c:3},
+        {a:1,b:2,c:3}
+        ]
+
+
+</script>
+
+
