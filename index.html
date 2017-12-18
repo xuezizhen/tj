@@ -60,9 +60,12 @@
 
     <!--登录-->
     <div class="sign" ng-hide="signOk==1">
+
+        <span style="position: absolute;top:2%;right:33%;">精品小店欢迎光临</span>
+
         <div class="signbox">
-            <input type="text" placeholder="账号" ng-model="text1">
-            <input type="text" placeholder="密码" ng-model="text2">
+            <input type="text" placeholder="请输入登录账号" ng-model="text1">
+            <input type="text" placeholder="请输入登录密码" ng-model="text2">
             <button type="submit" ng-click="signIn()">确定</button>
             <button type="reset" ng-click="signOut()">取消</button>
         </div>
@@ -71,6 +74,10 @@
     <!--首页-->
     <div class="page" ng-show="selected==0">
 
+
+        <div> <h1 style="height:30px;line-height: 30px;text-align: center;padding:10px 0;border-bottom: 3px dashed #cccccc;margin-bottom: 1px;">
+            薛子朕的精品小店
+        </h1></div>
         <div class="goods" ng-repeat="item in arr">
             <div class="good">
                 <img ng-src="{{item.gImg}}" alt="">
@@ -93,11 +100,15 @@
             订单详情
         </p>
 
+        <div style="padding:5%;border-bottom: 2px solid #cccccc">
+            <div class="goodsAll" ng-repeat="item in ddLi"  style="border:none;">
+                <img src="{{ item.gImg }}">
+                <p>{{ item.dd }} * {{item.num}}</p>
+            </div>
 
-        <div class="" ng-repeat="item in goodsLi">
-            <p>{{ item.des }}</p><span>{{item.num}}</span>
-
+            <p style="text-align: right">应付金额: {{ ddPrise|currency:'¥' }}</p>
         </div>
+
 
 
 
@@ -184,6 +195,8 @@
 
         $scope.selected=0;
         $scope.goodsLi = [];   //购物车数组
+        $scope.ddLi=[];        //订单数组
+        $scope.ddPrise=0;
 
         /*底部切换*/
         $scope.choose=function (i) {
@@ -203,16 +216,15 @@
 
         //首页商品数组
         $scope.arr = [
-            { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物',num:0 },
-            { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物',num:0  },
-            { gImg:'images/3.jpg',price:108,des:'智趣屋diy小屋西雅图手工制作房子拼装模型屋别墅玩具屋',num:0  },
-            { gImg:'images/4.jpg',price:48,des:'美国进口拼图表白爱意爱情神器礼物给女生心意礼品' ,num:0 },
+            { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物',num:0,dd:'DIY小屋' },
+            { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物',num:0,dd:'创意茶包'  },
+            { gImg:'images/3.jpg',price:108,des:'智趣屋diy小屋西雅图手工制作房子拼装模型屋别墅玩具屋',num:0,dd:'智趣屋'  },
+            { gImg:'images/4.jpg',price:48,des:'美国进口拼图表白爱意爱情神器礼物给女生心意礼品' ,num:0,dd:'表白神器' },
             { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物' ,num:0 },
-            { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物',num:0  },
-            { gImg:'images/3.jpg',price:108,des:'智趣屋diy小屋西雅图手工制作房子拼装模型屋别墅玩具屋',num:0  },
-            { gImg:'images/4.jpg',price:48,des:'美国进口拼图表白爱意爱情神器礼物给女生心意礼品',num:0  },
-            { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物',num:0  },
-            { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物' ,num:0 }
+            { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物',num:0,dd:'DIY小屋' },
+            { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物',num:0,dd:'创意茶包'  },
+            { gImg:'images/3.jpg',price:108,des:'智趣屋diy小屋西雅图手工制作房子拼装模型屋别墅玩具屋',num:0,dd:'智趣屋'  },
+            { gImg:'images/4.jpg',price:48,des:'美国进口拼图表白爱意爱情神器礼物给女生心意礼品' ,num:0,dd:'表白神器' }
         ];
 
         /*首页商品数量++*/
@@ -236,9 +248,28 @@
             });
             return $scope.totlePrise  //返回总价
         };
-
+        //购物车：购买
         $scope.buy=function () {
-            $scope.goodsLi = []
+            $scope.ddLi=[];                  //重置订单
+            $scope.ddLi=$scope.goodsLi;    //订单=购物车
+            $scope.goodsLi = [];            //清空购物车
+            $scope.ddPrise=0;
+
+            console.log($scope.ddLi);
+            $scope.arr = [
+                { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物',num:0 },
+                { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物',num:0  },
+                { gImg:'images/3.jpg',price:108,des:'智趣屋diy小屋西雅图手工制作房子拼装模型屋别墅玩具屋',num:0  },
+                { gImg:'images/4.jpg',price:48,des:'美国进口拼图表白爱意爱情神器礼物给女生心意礼品' ,num:0 },
+                { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物' ,num:0 },
+                { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物',num:0  },
+                { gImg:'images/3.jpg',price:108,des:'智趣屋diy小屋西雅图手工制作房子拼装模型屋别墅玩具屋',num:0  },
+                { gImg:'images/4.jpg',price:48,des:'美国进口拼图表白爱意爱情神器礼物给女生心意礼品',num:0  },
+                { gImg:'images/1.jpg',price:338,des:'若态3D立体拼图益智拼装模型DIY小屋成人生日创意礼物',num:0  },
+                { gImg:'images/2.jpg',price:128,des:'黃色潛水艇创意茶包泡茶器冲茶器创意茶包创意礼品/礼物' ,num:0 }
+            ];
+            $scope.ddPrise=$scope.totlePrise;
+
         };
 
         //地址
@@ -335,18 +366,6 @@
 
 
 
-    var a=1;
-    var b=2;
-    var c=3;
-    var arr=[];
-
-    //??
-
-    var arr=[
-        {a:1,b:2,c:3},
-        {a:1,b:2,c:3},
-        {a:1,b:2,c:3}
-        ]
 
 
 </script>
